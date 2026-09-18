@@ -46,12 +46,35 @@
       <div class="chip-row" id="sector-filters"></div>
     </div>
 
+    <div class="filter-group" role="group" aria-label="Filter by application status">
+      <span class="filter-label">Application status</span>
+      <div class="chip-row" id="stage-filters"></div>
+    </div>
+
     <div class="control-row control-row-tight">
       <label class="checkbox-inline">
         <input type="checkbox" id="hide-closed">
         Hide jobs closing within the next day
       </label>
-      <button id="clear-filters" class="link-btn" type="button">Clear filters</button>
+      <div class="control-row-actions">
+        <button id="toggle-settings" class="link-btn" type="button">Sync settings</button>
+        <button id="clear-filters" class="link-btn" type="button">Clear filters</button>
+      </div>
+    </div>
+
+    <div id="settings-panel" class="settings-panel" hidden>
+      <p class="settings-copy">
+        To save application status back to the board (so it syncs across your devices), paste a GitHub
+        <strong>fine-grained personal access token</strong> scoped to just the <code>Apply-Buddy</code> repo with
+        <strong>Contents: Read and write</strong>. It's stored only in this browser (localStorage) and used only to
+        call GitHub's API directly from your device — it never goes anywhere else.
+      </p>
+      <div class="control-row">
+        <input type="password" id="gh-token-input" placeholder="github_pat_…" aria-label="GitHub token">
+        <button id="gh-token-save" class="btn-primary" type="button">Save</button>
+        <button id="gh-token-clear" class="link-btn" type="button">Clear</button>
+      </div>
+      <p id="gh-token-status" class="settings-status"></p>
     </div>
   </section>
 
