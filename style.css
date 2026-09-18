@@ -158,6 +158,46 @@ select {
   padding: 0;
 }
 
+.control-row-actions { display: flex; gap: 14px; align-items: center; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.btn-primary:hover { opacity: 0.92; }
+
+.settings-panel {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+.settings-copy { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.5; }
+.settings-copy code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+#gh-token-input {
+  flex: 1 1 220px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.settings-status { font-size: 12px; margin: 8px 0 0; color: var(--text-muted); min-height: 16px; }
+.settings-status.ok { color: #1a8f4c; }
+.settings-status.error { color: var(--danger); }
+
 .results { display: flex; flex-direction: column; gap: 10px; }
 
 .job-card {
@@ -209,6 +249,37 @@ select {
 }
 
 .job-notes { margin-top: 6px; font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+.job-tracker {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stage-select {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.stage-select.stage-not_applied { background: var(--bg); color: var(--text-muted); }
+.stage-select.stage-applied { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+.stage-select.stage-interview { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.stage-select.stage-offer { background: #e1f6ea; color: #1a8f4c; border-color: transparent; }
+.stage-select.stage-rejected { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+@media (prefers-color-scheme: dark) {
+  .stage-select.stage-offer { background: #123a26; color: #6fd99a; }
+}
+
+.tracker-status { font-size: 11px; color: var(--text-muted); }
+.tracker-status.ok { color: #1a8f4c; }
+.tracker-status.error { color: var(--danger); }
 
 .empty-state {
   text-align: center;

@@ -1,6 +1,11 @@
 (function () {
   "use strict";
 
+  var REPO_OWNER = "Bryan-GP";
+  var REPO_NAME = "Apply-Buddy";
+  var DATA_PATH = "data/jobs.json";
+  var TOKEN_KEY = "applyBuddyGhToken";
+
   var SECTORS = [
     { key: "consulting", label: "Consulting" },
     { key: "strategy", label: "Strategy" },
@@ -16,15 +21,25 @@
     { key: "trainee", label: "Trainee" }
   ];
 
+  var STAGES = [
+    { key: "not_applied", label: "Not applied" },
+    { key: "applied", label: "Applied" },
+    { key: "interview", label: "Interview" },
+    { key: "offer", label: "Offer" },
+    { key: "rejected", label: "Rejected" }
+  ];
+
   var state = {
     jobs: [],
     search: "",
     sectors: new Set(),
     levels: new Set(),
+    stages: new Set(),
     sort: "closing-asc",
     hideClosed: false
   };
 
+  // ---------- small DOM helper ----------
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     attrs = attrs || {};
@@ -50,17 +65,12 @@
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   }
 
-  function sectorLabel(key) {
-    var s = SECTORS.filter(function (s) { return s.key === key; })[0];
-    return s ? s.label : key;
+  function labelFor(list, key) {
+    var m = list.filter(function (x) { return x.key === key; })[0];
+    return m ? m.label : key;
   }
 
-  function levelLabel(key) {
-    var l = LEVELS.filter(function (l) { return l.key === key; })[0];
-    return l ? l.label : key;
-  }
-
-  function buildChips(container, items, selectedSet, onChange) {
+  function buildChips(container, items, selectedSet) {
     container.innerHTML = "";
     items.forEach(function (item) {
       var chip = el("button", { type: "button", class: "chip", "data-key": item.key, text: item.label });
@@ -68,15 +78,40 @@
         if (selectedSet.has(item.key)) selectedSet.delete(item.key);
         else selectedSet.add(item.key);
         chip.classList.toggle("active");
-        onChange();
+        render();
       });
       container.appendChild(chip);
     });
   }
 
+  // ---------- base64 <-> UTF-8 helpers (for GitHub Contents API) ----------
+  function b64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
+      return String.fromCharCode(parseInt(p1, 16));
+    }));
+  }
+  function b64DecodeUnicode(str) {
+    return decodeURIComponent(atob(str).split("").map(function (c) {
+      return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(""));
+  }
+
+  // ---------- GitHub token storage ----------
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setToken(v) {
+    try { localStorage.setItem(TOKEN_KEY, v); } catch (e) { /* ignore */ }
+  }
+  function clearToken() {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
+  }
+
+  // ---------- filtering / sorting ----------
   function matchesFilters(job) {
     if (state.sectors.size && !state.sectors.has(job.sector)) return false;
     if (state.levels.size && !state.levels.has(job.level)) return false;
+    if (state.stages.size && !state.stages.has(job.stage || "not_applied")) return false;
     if (state.search) {
       var haystack = (job.title + " " + job.company + " " + job.location).toLowerCase();
       if (haystack.indexOf(state.search.toLowerCase()) === -1) return false;
@@ -97,20 +132,83 @@
         return da - db;
       });
     } else if (state.sort === "found-desc") {
-      copy.sort(function (a, b) {
-        return new Date(b.date_found || 0) - new Date(a.date_found || 0);
-      });
+      copy.sort(function (a, b) { return new Date(b.date_found || 0) - new Date(a.date_found || 0); });
     } else if (state.sort === "company-asc") {
       copy.sort(function (a, b) { return (a.company || "").localeCompare(b.company || ""); });
     }
     return copy;
   }
 
+  // ---------- persisting a stage change back to GitHub ----------
+  function saveStageToGitHub(job, newStage, statusEl) {
+    var token = getToken();
+    if (!token) {
+      statusEl.textContent = "Not saved — add a sync token in Sync settings to persist across devices.";
+      statusEl.className = "tracker-status error";
+      return;
+    }
+
+    statusEl.textContent = "Saving…";
+    statusEl.className = "tracker-status";
+
+    var apiUrl = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + DATA_PATH;
+    var headers = {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json"
+    };
+
+    fetch(apiUrl, { headers: headers })
+      .then(function (r) {
+        if (!r.ok) throw { step: "read", status: r.status };
+        return r.json();
+      })
+      .then(function (fileData) {
+        var text = b64DecodeUnicode(fileData.content);
+        var json = JSON.parse(text);
+        var target = (json.jobs || []).filter(function (j) { return j.id === job.id; })[0];
+        if (!target) throw { step: "find" };
+        target.stage = newStage;
+        target.applied = newStage !== "not_applied";
+
+        var updatedText = JSON.stringify(json, null, 2) + "\n";
+        var body = {
+          message: "Update application status: " + job.company + " – " + job.title + " -> " + newStage,
+          content: b64EncodeUnicode(updatedText),
+          sha: fileData.sha,
+          branch: "main"
+        };
+
+        return fetch(apiUrl, {
+          method: "PUT",
+          headers: Object.assign({ "Content-Type": "application/json" }, headers),
+          body: JSON.stringify(body)
+        }).then(function (r) {
+          if (!r.ok) throw { step: "write", status: r.status };
+          return r.json();
+        });
+      })
+      .then(function () {
+        statusEl.textContent = "Saved ✓";
+        statusEl.className = "tracker-status ok";
+        setTimeout(function () { statusEl.textContent = ""; }, 2500);
+      })
+      .catch(function (err) {
+        var msg = "Couldn't save.";
+        if (err && err.status === 401) msg = "Token rejected — check it in Sync settings.";
+        else if (err && err.status === 403) msg = "Token lacks write access to this repo.";
+        else if (err && err.status === 409) msg = "Someone else updated the file — reopen and retry.";
+        else if (err && err.status === 404) msg = "Couldn't find the data file on GitHub.";
+        statusEl.textContent = msg;
+        statusEl.className = "tracker-status error";
+      });
+  }
+
+  // ---------- rendering ----------
   function renderJobCard(job) {
     var days = daysUntil(job.closing_date);
     var badges = [
-      el("span", { class: "badge badge-level", text: levelLabel(job.level) }),
-      el("span", { class: "badge badge-sector", text: sectorLabel(job.sector) })
+      el("span", { class: "badge badge-level", text: labelFor(LEVELS, job.level) }),
+      el("span", { class: "badge badge-sector", text: labelFor(SECTORS, job.sector) })
     ];
     if (days !== null && days < 0) {
       badges.push(el("span", { class: "badge badge-closed", text: "Likely closed" }));
@@ -124,10 +222,7 @@
       el("div", { class: "job-company", text: job.company })
     ]);
 
-    var top = el("div", { class: "job-top" }, [
-      titleLine,
-      el("div", { class: "job-badges" }, badges)
-    ]);
+    var top = el("div", { class: "job-top" }, [titleLine, el("div", { class: "job-badges" }, badges)]);
 
     var meta = el("div", { class: "job-meta" }, [
       el("span", { text: "📍 " + job.location }),
@@ -139,6 +234,32 @@
     if (job.notes) {
       card.appendChild(el("div", { class: "job-notes", text: job.notes }));
     }
+
+    // application tracker row
+    var currentStage = job.stage || "not_applied";
+    var select = el("select", { class: "stage-select stage-" + currentStage, "aria-label": "Application status for " + job.title });
+    STAGES.forEach(function (s) {
+      var opt = el("option", { value: s.key, text: s.label });
+      if (s.key === currentStage) opt.setAttribute("selected", "selected");
+      select.appendChild(opt);
+    });
+
+    var statusEl = el("span", { class: "tracker-status" });
+
+    select.addEventListener("change", function () {
+      var newStage = select.value;
+      STAGES.forEach(function (s) { select.classList.remove("stage-" + s.key); });
+      select.classList.add("stage-" + newStage);
+      job.stage = newStage;
+      job.applied = newStage !== "not_applied";
+      saveStageToGitHub(job, newStage, statusEl);
+      // if this job no longer matches the active stage filter, re-render the list
+      if (state.stages.size && !matchesFilters(job)) render();
+    });
+
+    var tracker = el("div", { class: "job-tracker" }, [select, statusEl]);
+    card.appendChild(tracker);
+
     return card;
   }
 
@@ -156,6 +277,42 @@
     countPill.textContent = filtered.length + (filtered.length === 1 ? " job" : " jobs");
   }
 
+  // ---------- settings panel ----------
+  function initSettings() {
+    var panel = document.getElementById("settings-panel");
+    var toggleBtn = document.getElementById("toggle-settings");
+    var input = document.getElementById("gh-token-input");
+    var saveBtn = document.getElementById("gh-token-save");
+    var clearBtn = document.getElementById("gh-token-clear");
+    var status = document.getElementById("gh-token-status");
+
+    var existing = getToken();
+    if (existing) {
+      status.textContent = "Sync token saved in this browser.";
+      status.className = "settings-status ok";
+    }
+
+    toggleBtn.addEventListener("click", function () {
+      panel.hidden = !panel.hidden;
+    });
+
+    saveBtn.addEventListener("click", function () {
+      var v = input.value.trim();
+      if (!v) return;
+      setToken(v);
+      input.value = "";
+      status.textContent = "Sync token saved in this browser.";
+      status.className = "settings-status ok";
+    });
+
+    clearBtn.addEventListener("click", function () {
+      clearToken();
+      status.textContent = "Sync token cleared.";
+      status.className = "settings-status";
+    });
+  }
+
+  // ---------- boot ----------
   function init(data) {
     state.jobs = data.jobs || [];
 
@@ -169,8 +326,9 @@
       lastUpdated.textContent = "Not yet updated";
     }
 
-    buildChips(document.getElementById("level-filters"), LEVELS, state.levels, render);
-    buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors, render);
+    buildChips(document.getElementById("level-filters"), LEVELS, state.levels);
+    buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors);
+    buildChips(document.getElementById("stage-filters"), STAGES, state.stages);
 
     document.getElementById("search").addEventListener("input", function (e) {
       state.search = e.target.value;
@@ -188,6 +346,7 @@
       state.search = "";
       state.sectors.clear();
       state.levels.clear();
+      state.stages.clear();
       state.hideClosed = false;
       document.getElementById("search").value = "";
       document.getElementById("hide-closed").checked = false;
@@ -195,6 +354,7 @@
       render();
     });
 
+    initSettings();
     render();
   }
 
