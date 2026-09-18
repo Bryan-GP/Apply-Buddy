@@ -5,6 +5,7 @@
   var REPO_NAME = "Apply-Buddy";
   var DATA_PATH = "data/jobs.json";
   var TOKEN_KEY = "applyBuddyGhToken";
+  var LOCAL_STATUS_KEY = "applyBuddyLocalStatus";
 
   var SECTORS = [
     { key: "consulting", label: "Consulting" },
@@ -107,6 +108,39 @@
     try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
   }
 
+  // ---------- per-viewer local tracking (no token needed, private to this browser) ----------
+  // Anyone opening this site — including someone with no GitHub token at all — gets their own
+  // private application-status overlay stored only in their own browser. It never touches the
+  // shared data file unless a sync token is also set, so a friend using this link can track her
+  // own progress without ever writing to, or interfering with, the owner's synced board.
+  function getLocalOverlay() {
+    try { return JSON.parse(localStorage.getItem(LOCAL_STATUS_KEY) || "{}"); } catch (e) { return {}; }
+  }
+  function setLocalOverlayEntry(jobId, stage) {
+    var overlay = getLocalOverlay();
+    overlay[jobId] = { stage: stage, updatedAt: new Date().toISOString() };
+    try { localStorage.setItem(LOCAL_STATUS_KEY, JSON.stringify(overlay)); } catch (e) { /* ignore */ }
+  }
+  function clearLocalOverlayEntry(jobId) {
+    var overlay = getLocalOverlay();
+    delete overlay[jobId];
+    try { localStorage.setItem(LOCAL_STATUS_KEY, JSON.stringify(overlay)); } catch (e) { /* ignore */ }
+  }
+  function clearAllLocalOverlay() {
+    try { localStorage.removeItem(LOCAL_STATUS_KEY); } catch (e) { /* ignore */ }
+  }
+  function pruneLocalOverlay(validIds) {
+    var overlay = getLocalOverlay();
+    var validSet = new Set(validIds);
+    var changed = false;
+    Object.keys(overlay).forEach(function (id) {
+      if (!validSet.has(id)) { delete overlay[id]; changed = true; }
+    });
+    if (changed) {
+      try { localStorage.setItem(LOCAL_STATUS_KEY, JSON.stringify(overlay)); } catch (e) { /* ignore */ }
+    }
+  }
+
   // ---------- filtering / sorting ----------
   function matchesFilters(job) {
     if (state.sectors.size && !state.sectors.has(job.sector)) return false;
@@ -139,16 +173,12 @@
     return copy;
   }
 
-  // ---------- persisting a stage change back to GitHub ----------
-  function saveStageToGitHub(job, newStage, statusEl) {
+  // ---------- persisting a stage change back to GitHub (owner-only, requires a sync token) ----------
+  function saveStageToGitHub(job, newStage, statusEl, onSynced) {
     var token = getToken();
-    if (!token) {
-      statusEl.textContent = "Not saved — add a sync token in Sync settings to persist across devices.";
-      statusEl.className = "tracker-status error";
-      return;
-    }
+    if (!token) return; // caller already checked; local-only save has already happened
 
-    statusEl.textContent = "Saving…";
+    statusEl.textContent = "Saving to shared board…";
     statusEl.className = "tracker-status";
 
     var apiUrl = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + DATA_PATH;
@@ -188,16 +218,17 @@
         });
       })
       .then(function () {
-        statusEl.textContent = "Saved ✓";
+        statusEl.textContent = "Saved to shared board ✓";
         statusEl.className = "tracker-status ok";
+        if (onSynced) onSynced();
         setTimeout(function () { statusEl.textContent = ""; }, 2500);
       })
       .catch(function (err) {
-        var msg = "Couldn't save.";
-        if (err && err.status === 401) msg = "Token rejected — check it in Sync settings.";
-        else if (err && err.status === 403) msg = "Token lacks write access to this repo.";
-        else if (err && err.status === 409) msg = "Someone else updated the file — reopen and retry.";
-        else if (err && err.status === 404) msg = "Couldn't find the data file on GitHub.";
+        var msg = "Saved on this device only — couldn't sync to the shared board.";
+        if (err && err.status === 401) msg = "Saved on this device only — sync token rejected, check Sync settings.";
+        else if (err && err.status === 403) msg = "Saved on this device only — sync token lacks write access.";
+        else if (err && err.status === 409) msg = "Saved on this device only — someone else updated the file, reopen and retry.";
+        else if (err && err.status === 404) msg = "Saved on this device only — couldn't find the data file on GitHub.";
         statusEl.textContent = msg;
         statusEl.className = "tracker-status error";
       });
@@ -252,7 +283,22 @@
       select.classList.add("stage-" + newStage);
       job.stage = newStage;
       job.applied = newStage !== "not_applied";
-      saveStageToGitHub(job, newStage, statusEl);
+
+      // Always save privately to this browser first — works with no token, no account, nothing.
+      setLocalOverlayEntry(job.id, newStage);
+
+      if (getToken()) {
+        saveStageToGitHub(job, newStage, statusEl, function onSynced() {
+          // Canonical copy now matches on GitHub; drop the local override so future visits
+          // reflect the shared file directly rather than a possibly-stale local copy.
+          clearLocalOverlayEntry(job.id);
+        });
+      } else {
+        statusEl.textContent = "Saved on this device (private to you).";
+        statusEl.className = "tracker-status ok";
+        setTimeout(function () { statusEl.textContent = ""; }, 3000);
+      }
+
       // if this job no longer matches the active stage filter, re-render the list
       if (state.stages.size && !matchesFilters(job)) render();
     });
@@ -285,10 +331,11 @@
     var saveBtn = document.getElementById("gh-token-save");
     var clearBtn = document.getElementById("gh-token-clear");
     var status = document.getElementById("gh-token-status");
+    var clearTrackingBtn = document.getElementById("clear-my-tracking");
 
     var existing = getToken();
     if (existing) {
-      status.textContent = "Sync token saved in this browser.";
+      status.textContent = "Sync token saved in this browser — your status changes update the shared board.";
       status.className = "settings-status ok";
     }
 
@@ -301,20 +348,41 @@
       if (!v) return;
       setToken(v);
       input.value = "";
-      status.textContent = "Sync token saved in this browser.";
+      status.textContent = "Sync token saved in this browser — your status changes update the shared board.";
       status.className = "settings-status ok";
     });
 
     clearBtn.addEventListener("click", function () {
       clearToken();
-      status.textContent = "Sync token cleared.";
+      status.textContent = "Sync token cleared. Your status changes now stay private to this device.";
       status.className = "settings-status";
     });
+
+    if (clearTrackingBtn) {
+      clearTrackingBtn.addEventListener("click", function () {
+        if (!confirm("Clear your personal application tracking on this device? This can't be undone.")) return;
+        clearAllLocalOverlay();
+        status.textContent = "Your local tracking was cleared.";
+        status.className = "settings-status";
+        location.reload();
+      });
+    }
   }
 
   // ---------- boot ----------
   function init(data) {
     state.jobs = data.jobs || [];
+
+    // layer this viewer's private, local-only status overrides on top of the shared data
+    var overlay = getLocalOverlay();
+    state.jobs.forEach(function (job) {
+      var override = overlay[job.id];
+      if (override) {
+        job.stage = override.stage;
+        job.applied = override.stage !== "not_applied";
+      }
+    });
+    pruneLocalOverlay(state.jobs.map(function (j) { return j.id; }));
 
     var lastUpdated = document.getElementById("last-updated");
     if (data.last_updated) {

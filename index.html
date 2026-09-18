@@ -64,17 +64,26 @@
 
     <div id="settings-panel" class="settings-panel" hidden>
       <p class="settings-copy">
-        To save application status back to the board (so it syncs across your devices), paste a GitHub
-        <strong>fine-grained personal access token</strong> scoped to just the <code>Apply-Buddy</code> repo with
-        <strong>Contents: Read and write</strong>. It's stored only in this browser (localStorage) and used only to
-        call GitHub's API directly from your device — it never goes anywhere else.
+        Clicking an application status on any job already saves it privately to <strong>this browser only</strong> —
+        no account, no token, nothing to set up. That's all most people need, and it never touches anyone else's view
+        of the board.
+      </p>
+      <p class="settings-copy">
+        The board owner can optionally paste a GitHub <strong>fine-grained personal access token</strong> (scoped to
+        just this repo, <strong>Contents: Read and write</strong>) below to make status changes update the
+        <em>shared</em> board everyone sees instead of staying private to one device. It's stored only in this browser
+        (localStorage) and used only to call GitHub's API directly — it never goes anywhere else. Most visitors should
+        leave this blank.
       </p>
       <div class="control-row">
-        <input type="password" id="gh-token-input" placeholder="github_pat_…" aria-label="GitHub token">
+        <input type="password" id="gh-token-input" placeholder="github_pat_… (owner only)" aria-label="GitHub token">
         <button id="gh-token-save" class="btn-primary" type="button">Save</button>
         <button id="gh-token-clear" class="link-btn" type="button">Clear</button>
       </div>
       <p id="gh-token-status" class="settings-status"></p>
+      <p class="settings-copy" style="margin-top:14px;">
+        <button id="clear-my-tracking" class="link-btn" type="button">Clear my personal tracking on this device</button>
+      </p>
     </div>
   </section>
 
