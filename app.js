@@ -7,6 +7,8 @@
   var TOKEN_KEY = "applyBuddyGhToken";
   var LOCAL_STATUS_KEY = "applyBuddyLocalStatus";
   var THEME_KEY = "applyBuddyTheme";
+  var TRACKER_NAME_KEY = "applyBuddyTrackerName";
+  var TRACKER_TOKEN_KEY = "applyBuddyTrackerToken";
 
   var SECTORS = [
     { key: "consulting", label: "Consulting" },
@@ -153,6 +155,30 @@
     try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
   }
 
+  // ---------- named-tracker identity (a second person's own token, kept fully separate
+  // from the board owner's TOKEN_KEY above — their writes never touch job.stage/applied) ----------
+  function slugify(name) {
+    return String(name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function getTrackerName() {
+    try { return localStorage.getItem(TRACKER_NAME_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setTrackerName(v) {
+    try { localStorage.setItem(TRACKER_NAME_KEY, v); } catch (e) { /* ignore */ }
+  }
+  function getTrackerToken() {
+    try { return localStorage.getItem(TRACKER_TOKEN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setTrackerToken(v) {
+    try { localStorage.setItem(TRACKER_TOKEN_KEY, v); } catch (e) { /* ignore */ }
+  }
+  function clearTrackerIdentity() {
+    try { localStorage.removeItem(TRACKER_NAME_KEY); localStorage.removeItem(TRACKER_TOKEN_KEY); } catch (e) { /* ignore */ }
+  }
+  function hasTrackerIdentity() {
+    return !!(getTrackerName() && getTrackerToken());
+  }
+
   // ---------- per-viewer local tracking (no token needed, private to this browser) ----------
   // Anyone opening this site — including someone with no GitHub token at all — gets their own
   // private application-status overlay stored only in their own browser. It never touches the
@@ -288,6 +314,72 @@
       });
   }
 
+  // ---------- persisting a stage change under a named tracker's OWN sub-object ----------
+  // Writes to job.trackers[slug] only — never touches job.stage/job.applied, so this can
+  // never collide with the board owner's (or anyone else's) tracking on the same job.
+  function saveTrackerStageToGitHub(job, newStage, statusEl, onSynced) {
+    var token = getTrackerToken();
+    var name = getTrackerName();
+    if (!token || !name) return;
+    var slug = slugify(name);
+
+    statusEl.textContent = "Saving under \"" + name + "\"…";
+    statusEl.className = "tracker-status";
+
+    var apiUrl = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + DATA_PATH;
+    var headers = {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json"
+    };
+
+    fetch(apiUrl, { headers: headers })
+      .then(function (r) {
+        if (!r.ok) throw { step: "read", status: r.status };
+        return r.json();
+      })
+      .then(function (fileData) {
+        var text = b64DecodeUnicode(fileData.content);
+        var json = JSON.parse(text);
+        var target = (json.jobs || []).filter(function (j) { return j.id === job.id; })[0];
+        if (!target) throw { step: "find" };
+        target.trackers = target.trackers || {};
+        target.trackers[slug] = { name: name, stage: newStage, updatedAt: new Date().toISOString() };
+        // job.stage / job.applied (the owner's canonical fields) are deliberately left untouched.
+
+        var updatedText = JSON.stringify(json, null, 2) + "\n";
+        var body = {
+          message: name + " updated tracking: " + job.company + " – " + job.title + " -> " + newStage,
+          content: b64EncodeUnicode(updatedText),
+          sha: fileData.sha,
+          branch: "main"
+        };
+
+        return fetch(apiUrl, {
+          method: "PUT",
+          headers: Object.assign({ "Content-Type": "application/json" }, headers),
+          body: JSON.stringify(body)
+        }).then(function (r) {
+          if (!r.ok) throw { step: "write", status: r.status };
+          return r.json();
+        });
+      })
+      .then(function () {
+        statusEl.textContent = "Saved as \"" + name + "\" ✓ (follows you across devices)";
+        statusEl.className = "tracker-status ok";
+        if (onSynced) onSynced();
+        setTimeout(function () { statusEl.textContent = ""; }, 3000);
+      })
+      .catch(function (err) {
+        var msg = "Saved on this device only — couldn't sync your tracking.";
+        if (err && err.status === 401) msg = "Saved on this device only — your token was rejected, check the Track panel.";
+        else if (err && err.status === 403) msg = "Saved on this device only — your token lacks write access (are you a collaborator?).";
+        else if (err && err.status === 409) msg = "Saved on this device only — someone else updated the file, reopen and retry.";
+        else if (err && err.status === 404) msg = "Saved on this device only — couldn't find the data file on GitHub.";
+        statusEl.textContent = msg;
+        statusEl.className = "tracker-status error";
+      });
+  }
+
   // ---------- deadline pill (soonest-closing gets the loudest treatment) ----------
   function deadlineBadge(job) {
     var closing = job.closing_date;
@@ -361,7 +453,9 @@
       // drop it from view — do that instead of the lighter in-place update below
       if (state.stages.size && !matchesFilters(job)) {
         setLocalOverlayEntry(job.id, newStage);
-        if (getToken()) {
+        if (hasTrackerIdentity()) {
+          saveTrackerStageToGitHub(job, newStage, statusEl, function onSynced() { clearLocalOverlayEntry(job.id); });
+        } else if (getToken()) {
           saveStageToGitHub(job, newStage, statusEl, function onSynced() { clearLocalOverlayEntry(job.id); });
         }
         render();
@@ -380,7 +474,13 @@
       // Always save privately to this browser first — works with no token, no account, nothing.
       setLocalOverlayEntry(job.id, newStage);
 
-      if (getToken()) {
+      if (hasTrackerIdentity()) {
+        // named-tracker sync: writes to job.trackers[slug] only, never job.stage — cannot
+        // collide with the owner's (or anyone else's) tracking of the same job
+        saveTrackerStageToGitHub(job, newStage, statusEl, function onSynced() {
+          clearLocalOverlayEntry(job.id);
+        });
+      } else if (getToken()) {
         saveStageToGitHub(job, newStage, statusEl, function onSynced() {
           // Canonical copy now matches on GitHub; drop the local override so future visits
           // reflect the shared file directly rather than a possibly-stale local copy.
@@ -489,6 +589,45 @@
         location.reload();
       });
     }
+
+    // ---- named-tracker identity (separate persistent tracking, own token) ----
+    var nameInput = document.getElementById("tracker-name-input");
+    var tokenInput = document.getElementById("tracker-token-input");
+    var trackerSaveBtn = document.getElementById("tracker-save");
+    var trackerClearBtn = document.getElementById("tracker-clear");
+    var trackerStatus = document.getElementById("tracker-status");
+
+    if (trackerSaveBtn) {
+      var existingName = getTrackerName();
+      if (existingName && getTrackerToken()) {
+        trackerStatus.textContent = "Tracking as \"" + existingName + "\" — your status syncs and follows you across devices.";
+        trackerStatus.className = "settings-status ok";
+        nameInput.value = existingName;
+      }
+
+      trackerSaveBtn.addEventListener("click", function () {
+        var name = nameInput.value.trim();
+        var token = tokenInput.value.trim();
+        if (!name || !token) {
+          trackerStatus.textContent = "Enter both a name and your token.";
+          trackerStatus.className = "settings-status error";
+          return;
+        }
+        setTrackerName(name);
+        setTrackerToken(token);
+        tokenInput.value = "";
+        trackerStatus.textContent = "Tracking as \"" + name + "\" — reload the page to see your synced statuses.";
+        trackerStatus.className = "settings-status ok";
+      });
+
+      trackerClearBtn.addEventListener("click", function () {
+        clearTrackerIdentity();
+        nameInput.value = "";
+        tokenInput.value = "";
+        trackerStatus.textContent = "Your tracking identity was cleared from this device (your data stays on GitHub).";
+        trackerStatus.className = "settings-status";
+      });
+    }
   }
 
   // ---------- boot ----------
@@ -500,9 +639,22 @@
       job.refId = "A" + String(i + 1).padStart(3, "0");
     });
 
-    // layer this viewer's private, local-only status overrides on top of the shared data
+    // layer this viewer's status on top of the shared canonical data, in priority order:
+    // 1) a named tracker's own synced entry (job.trackers[slug]) — highest priority, this
+    //    is real cross-device data pulled straight from the file just fetched
+    // 2) a plain private local-only override (no identity set up) — this browser only
+    // 3) otherwise fall back to the canonical job.stage (the board owner's tracking)
+    var trackerName = getTrackerName();
+    var trackerSlug = slugify(trackerName);
+    var trackerActive = hasTrackerIdentity();
     var overlay = getLocalOverlay();
     state.jobs.forEach(function (job) {
+      var trackerEntry = trackerActive && job.trackers ? job.trackers[trackerSlug] : null;
+      if (trackerEntry) {
+        job.stage = trackerEntry.stage;
+        job.applied = trackerEntry.stage !== "not_applied";
+        return;
+      }
       var override = overlay[job.id];
       if (override) {
         job.stage = override.stage;
@@ -510,6 +662,16 @@
       }
     });
     pruneLocalOverlay(state.jobs.map(function (j) { return j.id; }));
+
+    var trackerBadge = document.getElementById("tracker-badge");
+    if (trackerBadge) {
+      if (trackerActive) {
+        trackerBadge.textContent = "Tracking as \"" + trackerName + "\"";
+        trackerBadge.hidden = false;
+      } else {
+        trackerBadge.hidden = true;
+      }
+    }
 
     var lastUpdated = document.getElementById("last-updated");
     if (data.last_updated) {

@@ -213,14 +213,21 @@ select:focus, .search-input:focus, button:focus, input:focus{ outline:2px solid 
 .settings-copy code{
   background:var(--surface-2); border:1px solid var(--border); border-radius:4px; padding:1px 5px; font-size:11px;
 }
-#gh-token-input{
+#gh-token-input, #tracker-token-input{
   flex:1 1 220px; padding:9px 12px; border-radius:8px; border:1px solid var(--border);
   background:var(--surface-2); color:var(--text); font-size:13px;
   font-family:"IBM Plex Mono", ui-monospace, monospace;
 }
+#tracker-name-input{
+  flex:1 1 220px; padding:9px 12px; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-size:13px;
+}
 .settings-status{ font-size:12px; margin:8px 0 0; color:var(--text-muted); min-height:16px; }
 .settings-status.ok{ color:var(--ok); }
 .settings-status.error{ color:var(--danger); }
+.settings-divider{ margin-top:16px; padding-top:16px; border-top:1px dashed var(--border); }
+
+.pill-tracker{ background:var(--accent-soft); color:var(--accent); }
 
 /* Pills / badges */
 .pill{

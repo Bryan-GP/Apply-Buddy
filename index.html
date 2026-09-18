@@ -30,13 +30,14 @@
       <div class="today">
         <div id="last-updated" class="mono">Loading…</div>
         <div id="job-count" class="date mono">— jobs</div>
+        <div id="tracker-badge" class="pill pill-tracker" hidden></div>
       </div>
     </div>
   </div>
 
   <div class="banner">
     <span class="dot"></span>
-    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser · <b>Soonest-closing deadlines sort to the top</b> in every list below.</span>
+    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser (or sync under your own name in Sync settings for tracking that follows you across devices) · <b>Soonest-closing deadlines sort to the top</b> in every list below.</span>
   </div>
 
   <div class="stats" id="stats"></div>
@@ -88,6 +89,27 @@
         <button id="gh-token-clear" class="link-btn" type="button">Clear</button>
       </div>
       <p id="gh-token-status" class="settings-status"></p>
+
+      <div class="settings-divider">
+        <p class="settings-copy">
+          <strong>Not the board owner, but want your own status to follow you across devices?</strong> Ask the owner
+          to add you as a collaborator on the GitHub repo, then create a free GitHub account if you don't have one and
+          generate your own fine-grained personal access token (scoped to just this repo, <strong>Contents: Read and
+          write</strong>). Enter a short name plus that token below — your status then syncs under your own name,
+          completely separate from the owner's tracking and everyone else's. Nobody's changes ever overwrite anyone
+          else's.
+        </p>
+        <div class="control-row">
+          <input type="text" id="tracker-name-input" placeholder="Your name (e.g. Alice)" aria-label="Your tracking name" maxlength="30">
+        </div>
+        <div class="control-row">
+          <input type="password" id="tracker-token-input" placeholder="github_pat_… (your own token)" aria-label="Your GitHub token">
+          <button id="tracker-save" class="btn-primary" type="button">Save</button>
+          <button id="tracker-clear" class="link-btn" type="button">Clear</button>
+        </div>
+        <p id="tracker-status" class="settings-status"></p>
+      </div>
+
       <p class="settings-copy" style="margin-top:14px;">
         <button id="clear-my-tracking" class="link-btn" type="button">Clear my personal tracking on this device</button>
       </p>
