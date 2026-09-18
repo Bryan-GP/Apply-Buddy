@@ -203,7 +203,10 @@
     }
     if (state.hideClosed) {
       var d = daysUntil(job.closing_date);
-      if (d !== null && d < 1) return false;
+      var effectiveStage = job.stage || "not_applied";
+      // never let the "hide closed" checkbox hide a job you're actively tracking — a
+      // closed listing you already applied to is still worth seeing through to an outcome
+      if (d !== null && d < 1 && effectiveStage === "not_applied") return false;
     }
     return true;
   }
