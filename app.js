@@ -6,6 +6,7 @@
   var DATA_PATH = "data/jobs.json";
   var TOKEN_KEY = "applyBuddyGhToken";
   var LOCAL_STATUS_KEY = "applyBuddyLocalStatus";
+  var THEME_KEY = "applyBuddyTheme";
 
   var SECTORS = [
     { key: "consulting", label: "Consulting" },
@@ -22,12 +23,13 @@
     { key: "trainee", label: "Trainee" }
   ];
 
+  // label + left-border/pill colour class for each application stage
   var STAGES = [
-    { key: "not_applied", label: "Not applied" },
-    { key: "applied", label: "Applied" },
-    { key: "interview", label: "Interview" },
-    { key: "offer", label: "Offer" },
-    { key: "rejected", label: "Rejected" }
+    { key: "not_applied", label: "Not applied", cls: "muted" },
+    { key: "applied", label: "Applied", cls: "info" },
+    { key: "interview", label: "Interview", cls: "accent" },
+    { key: "offer", label: "Offer", cls: "ok" },
+    { key: "rejected", label: "Rejected", cls: "danger" }
   ];
 
   var state = {
@@ -53,6 +55,12 @@
     return node;
   }
 
+  function esc(s) {
+    return (s == null ? "" : String(s)).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
   function daysUntil(dateStr) {
     if (!dateStr) return null;
     var target = new Date(dateStr + "T23:59:59");
@@ -60,21 +68,58 @@
     return Math.ceil((target - now) / 86400000);
   }
 
-  function fmtDate(dateStr) {
-    if (!dateStr) return "Rolling / no deadline listed";
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function fmtDateShort(dateStr) {
     var d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   }
 
   function labelFor(list, key) {
     var m = list.filter(function (x) { return x.key === key; })[0];
     return m ? m.label : key;
   }
+  function metaFor(key) {
+    var m = STAGES.filter(function (s) { return s.key === key; })[0];
+    return m || { key: key, label: key || "Unknown", cls: "muted" };
+  }
 
-  function buildChips(container, items, selectedSet) {
+  // ---------- theme toggle (light / dark / auto), remembered per-browser only ----------
+  function applyTheme(choice) {
+    var root = document.documentElement;
+    if (choice === "light") root.setAttribute("data-theme", "light");
+    else if (choice === "dark") root.setAttribute("data-theme", "dark");
+    else root.removeAttribute("data-theme");
+    document.querySelectorAll("#themeToggle button").forEach(function (b) {
+      b.classList.toggle("active", b.getAttribute("data-theme-choice") === choice);
+    });
+  }
+  function initTheme() {
+    var saved = "auto";
+    try { saved = localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { /* ignore */ }
+    applyTheme(saved);
+    document.querySelectorAll("#themeToggle button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var choice = b.getAttribute("data-theme-choice");
+        applyTheme(choice);
+        try { localStorage.setItem(THEME_KEY, choice); } catch (e) { /* ignore */ }
+      });
+    });
+  }
+
+  // ---------- filter chips with live counts ----------
+  function buildChips(container, items, selectedSet, counts) {
     container.innerHTML = "";
     items.forEach(function (item) {
-      var chip = el("button", { type: "button", class: "chip", "data-key": item.key, text: item.label });
+      var n = counts ? (counts[item.key] || 0) : null;
+      var chip = el("button", { type: "button", class: "chip", "data-key": item.key });
+      chip.appendChild(document.createTextNode(item.label));
+      if (n !== null) {
+        chip.appendChild(el("span", { class: "count mono", text: " " + n }));
+      }
       chip.addEventListener("click", function () {
         if (selectedSet.has(item.key)) selectedSet.delete(item.key);
         else selectedSet.add(item.key);
@@ -141,14 +186,20 @@
     }
   }
 
+  // ---------- search ----------
+  function fuzzyMatch(job, qLower) {
+    var hay = [job.refId, job.id, job.title, job.company, job.location, job.sector, job.level, job.source, job.notes]
+      .filter(Boolean).join(" ").toLowerCase();
+    return hay.indexOf(qLower) !== -1;
+  }
+
   // ---------- filtering / sorting ----------
   function matchesFilters(job) {
     if (state.sectors.size && !state.sectors.has(job.sector)) return false;
     if (state.levels.size && !state.levels.has(job.level)) return false;
     if (state.stages.size && !state.stages.has(job.stage || "not_applied")) return false;
     if (state.search) {
-      var haystack = (job.title + " " + job.company + " " + job.location).toLowerCase();
-      if (haystack.indexOf(state.search.toLowerCase()) === -1) return false;
+      if (!fuzzyMatch(job, state.search.toLowerCase())) return false;
     }
     if (state.hideClosed) {
       var d = daysUntil(job.closing_date);
@@ -234,39 +285,58 @@
       });
   }
 
+  // ---------- deadline pill (soonest-closing gets the loudest treatment) ----------
+  function deadlineBadge(job) {
+    var closing = job.closing_date;
+    if (!closing) {
+      return '<span class="pill pill-deadline warn-txt">deadline unknown — check posting</span>';
+    }
+    var days = daysUntil(closing);
+    var pretty = fmtDateShort(closing);
+    var cls = "";
+    var label = "closes " + pretty;
+    if (days === null) { cls = ""; }
+    else if (days < 0) { cls = "danger-txt"; label = "closed " + pretty; }
+    else if (days === 0) { cls = "danger-txt"; label = "closes today"; }
+    else if (days <= 3) { cls = "danger-txt"; label = "closes " + pretty + " — " + days + "d left"; }
+    else if (days <= 14) { cls = "warn-txt"; label = "closes " + pretty + " — " + days + "d left"; }
+    return '<span class="pill pill-deadline ' + cls + '">' + esc(label) + "</span>";
+  }
+
   // ---------- rendering ----------
   function renderJobCard(job) {
-    var days = daysUntil(job.closing_date);
-    var badges = [
-      el("span", { class: "badge badge-level", text: labelFor(LEVELS, job.level) }),
-      el("span", { class: "badge badge-sector", text: labelFor(SECTORS, job.sector) })
-    ];
-    if (days !== null && days < 0) {
-      badges.push(el("span", { class: "badge badge-closed", text: "Likely closed" }));
-    } else if (days !== null && days <= 3) {
-      badges.push(el("span", { class: "badge badge-closing-soon", text: days <= 0 ? "Closes today" : "Closes in " + days + "d" }));
-    }
+    var meta = metaFor(job.stage || "not_applied");
+    var sectorKey = job.sector || "consulting";
 
-    var link = el("a", { href: job.url, target: "_blank", rel: "noopener", text: job.title });
-    var titleLine = el("div", { class: "job-title-line" }, [
-      el("h3", { class: "job-title" }, [link]),
-      el("div", { class: "job-company", text: job.company })
-    ]);
+    var refBadge = job.refId ? '<span class="refid">' + esc(job.refId) + "</span>" : "";
+    var titleHtml =
+      '<span class="job-title"><a href="' + esc(job.url) + '" target="_blank" rel="noopener">' + esc(job.title) + "</a></span>" +
+      ' <span class="job-company">— ' + esc(job.company) + "</span>";
 
-    var top = el("div", { class: "job-top" }, [titleLine, el("div", { class: "job-badges" }, badges)]);
+    var metaHtml =
+      '<span class="cat ' + esc(sectorKey) + '"><span class="dot"></span>' + esc(labelFor(SECTORS, job.sector)) + "</span>" +
+      '<span class="pill pill-loc">' + esc(labelFor(LEVELS, job.level)) + "</span>" +
+      "<span>📍 " + esc(job.location || "UK") + "</span>" +
+      "<span>·</span>" +
+      "<span>via " + esc(job.source || "—") + "</span>" +
+      "<span>·</span>" +
+      '<span class="mono">found ' + (job.date_found ? fmtDateShort(job.date_found) : "—") + "</span>" +
+      deadlineBadge(job);
 
-    var meta = el("div", { class: "job-meta" }, [
-      el("span", { text: "📍 " + job.location }),
-      el("span", { text: "🗓 " + fmtDate(job.closing_date) }),
-      el("span", { text: "via " + job.source })
-    ]);
+    var headHtml =
+      '<div class="job-top">' +
+      '<div class="job-title-line">' +
+      refBadge + titleHtml +
+      '<div class="job-meta">' + metaHtml + "</div>" +
+      "</div>" +
+      '<span class="status-pill status-' + meta.cls + '">' + esc(meta.label) + "</span>" +
+      "</div>";
 
-    var card = el("article", { class: "job-card" }, [top, meta]);
-    if (job.notes) {
-      card.appendChild(el("div", { class: "job-notes", text: job.notes }));
-    }
+    var notesHtml = job.notes ? '<div class="job-notes">' + esc(job.notes) + "</div>" : "";
 
-    // application tracker row
+    var card = el("article", { class: "job-card s-" + meta.cls, html: headHtml + notesHtml });
+
+    // application tracker row (job-foot)
     var currentStage = job.stage || "not_applied";
     var select = el("select", { class: "stage-select stage-" + currentStage, "aria-label": "Application status for " + job.title });
     STAGES.forEach(function (s) {
@@ -284,6 +354,26 @@
       job.stage = newStage;
       job.applied = newStage !== "not_applied";
 
+      // if this job no longer matches the active stage filter, a full re-render will
+      // drop it from view — do that instead of the lighter in-place update below
+      if (state.stages.size && !matchesFilters(job)) {
+        setLocalOverlayEntry(job.id, newStage);
+        if (getToken()) {
+          saveStageToGitHub(job, newStage, statusEl, function onSynced() { clearLocalOverlayEntry(job.id); });
+        }
+        render();
+        return;
+      }
+
+      // in-place visual update: status pill + card border colour, without rebuilding
+      // the whole list (so the transient save-status message below isn't wiped out)
+      var newMeta = metaFor(newStage);
+      var pillEl = card.querySelector(".status-pill");
+      if (pillEl) { pillEl.textContent = newMeta.label; pillEl.className = "status-pill status-" + newMeta.cls; }
+      STAGES.forEach(function (s) { card.classList.remove("s-" + s.cls); });
+      card.classList.add("s-" + newMeta.cls);
+      renderStats();
+
       // Always save privately to this browser first — works with no token, no account, nothing.
       setLocalOverlayEntry(job.id, newStage);
 
@@ -298,21 +388,49 @@
         statusEl.className = "tracker-status ok";
         setTimeout(function () { statusEl.textContent = ""; }, 3000);
       }
-
-      // if this job no longer matches the active stage filter, re-render the list
-      if (state.stages.size && !matchesFilters(job)) render();
     });
 
-    var tracker = el("div", { class: "job-tracker" }, [select, statusEl]);
-    card.appendChild(tracker);
+    var foot = el("div", { class: "job-foot" }, [
+      el("a", { class: "btn-link", href: job.url, target: "_blank", rel: "noopener", text: "View posting ↗" }),
+      el("div", { class: "job-actions" }, [select, statusEl])
+    ]);
+    card.appendChild(foot);
 
     return card;
+  }
+
+  function renderStats() {
+    var statsEl = document.getElementById("stats");
+    if (!statsEl) return;
+    var today = todayStr();
+    var jobs = state.jobs;
+    var foundToday = jobs.filter(function (j) { return j.date_found === today; }).length;
+    var notApplied = jobs.filter(function (j) { return (j.stage || "not_applied") === "not_applied"; }).length;
+    var inProgress = jobs.filter(function (j) { return j.stage === "applied" || j.stage === "interview"; }).length;
+    var offers = jobs.filter(function (j) { return j.stage === "offer"; }).length;
+    var closingSoon = jobs.filter(function (j) {
+      var d = daysUntil(j.closing_date);
+      return d !== null && d >= 0 && d <= 7 && (j.stage || "not_applied") !== "rejected";
+    }).length;
+    var total = jobs.length;
+
+    var tiles = [
+      { n: foundToday, l: "Found today", cls: "" },
+      { n: notApplied, l: "Not applied yet", cls: "" },
+      { n: inProgress, l: "In progress", cls: "accent" },
+      { n: offers, l: "Offers", cls: "ok" },
+      { n: closingSoon, l: "Closing ≤ 7 days", cls: "warn" },
+      { n: total, l: "Total tracked", cls: "" }
+    ];
+    statsEl.innerHTML = tiles.map(function (t) {
+      return '<div class="stat ' + t.cls + '"><div class="n mono">' + t.n + '</div><div class="l">' + esc(t.l) + "</div></div>";
+    }).join("");
   }
 
   function render() {
     var results = document.getElementById("results");
     var emptyState = document.getElementById("empty-state");
-    var countPill = document.getElementById("job-count");
+    var countEl = document.getElementById("job-count");
 
     var filtered = sortJobs(state.jobs.filter(matchesFilters));
 
@@ -320,7 +438,8 @@
     filtered.forEach(function (job) { results.appendChild(renderJobCard(job)); });
 
     emptyState.hidden = filtered.length !== 0;
-    countPill.textContent = filtered.length + (filtered.length === 1 ? " job" : " jobs");
+    if (countEl) countEl.textContent = filtered.length + (filtered.length === 1 ? " job shown" : " jobs shown");
+    renderStats();
   }
 
   // ---------- settings panel ----------
@@ -373,6 +492,11 @@
   function init(data) {
     state.jobs = data.jobs || [];
 
+    // stable, short display reference for each job (purely cosmetic — data schema is untouched)
+    state.jobs.forEach(function (job, i) {
+      job.refId = "A" + String(i + 1).padStart(3, "0");
+    });
+
     // layer this viewer's private, local-only status overrides on top of the shared data
     var overlay = getLocalOverlay();
     state.jobs.forEach(function (job) {
@@ -394,9 +518,18 @@
       lastUpdated.textContent = "Not yet updated";
     }
 
-    buildChips(document.getElementById("level-filters"), LEVELS, state.levels);
-    buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors);
-    buildChips(document.getElementById("stage-filters"), STAGES, state.stages);
+    // per-category counts for the filter chips
+    var levelCounts = {}, sectorCounts = {}, stageCounts = {};
+    state.jobs.forEach(function (j) {
+      levelCounts[j.level] = (levelCounts[j.level] || 0) + 1;
+      sectorCounts[j.sector] = (sectorCounts[j.sector] || 0) + 1;
+      var st = j.stage || "not_applied";
+      stageCounts[st] = (stageCounts[st] || 0) + 1;
+    });
+
+    buildChips(document.getElementById("level-filters"), LEVELS, state.levels, levelCounts);
+    buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors, sectorCounts);
+    buildChips(document.getElementById("stage-filters"), STAGES, state.stages, stageCounts);
 
     document.getElementById("search").addEventListener("input", function (e) {
       state.search = e.target.value;
@@ -426,12 +559,14 @@
     render();
   }
 
+  initTheme();
+
   fetch("data/jobs.json?_=" + Date.now())
     .then(function (r) { return r.json(); })
     .then(init)
     .catch(function (err) {
       document.getElementById("results").innerHTML =
-        "<p style='color:#c0293c'>Couldn't load job data (" + err.message + "). Try refreshing.</p>";
+        "<p style='color:#c23a34'>Couldn't load job data (" + err.message + "). Try refreshing.</p>";
       document.getElementById("last-updated").textContent = "Error loading data";
     });
 })();
