@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apply-Buddy — UK Grad, Junior & Trainee Roles</title>
+<meta name="description" content="Daily-updated board of UK graduate, junior and trainee roles in consulting, strategy, advisory, government affairs, think tanks and the civil service.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark">🎯</span>
+      <div>
+        <h1>Apply-Buddy</h1>
+        <p class="tagline">UK grad · junior · trainee roles in consulting, strategy, advisory, government &amp; policy</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span id="last-updated" class="pill">Loading…</span>
+      <span id="job-count" class="pill pill-accent">— jobs</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="controls" aria-label="Filters">
+    <div class="control-row">
+      <input type="search" id="search" placeholder="Search title, company, location…" aria-label="Search jobs">
+      <select id="sort" aria-label="Sort by">
+        <option value="closing-asc">Closing soonest</option>
+        <option value="found-desc">Newest first</option>
+        <option value="company-asc">Company A–Z</option>
+      </select>
+    </div>
+
+    <div class="filter-group" role="group" aria-label="Filter by level">
+      <span class="filter-label">Level</span>
+      <div class="chip-row" id="level-filters"></div>
+    </div>
+
+    <div class="filter-group" role="group" aria-label="Filter by sector">
+      <span class="filter-label">Sector</span>
+      <div class="chip-row" id="sector-filters"></div>
+    </div>
+
+    <div class="control-row control-row-tight">
+      <label class="checkbox-inline">
+        <input type="checkbox" id="hide-closed">
+        Hide jobs closing within the next day
+      </label>
+      <button id="clear-filters" class="link-btn" type="button">Clear filters</button>
+    </div>
+  </section>
+
+  <section id="results" class="results" aria-live="polite"></section>
+
+  <p id="empty-state" class="empty-state" hidden>
+    No roles match your filters right now. Try widening your search — or check back tomorrow, this board updates daily.
+  </p>
+</main>
+
+<footer class="site-footer">
+  <p>
+    Built for one person's job hunt, updated automatically once a day. Always verify details and apply on the employer's own site.
+    Source data: <a id="data-link" href="data/jobs.json">jobs.json</a> ·
+    <a href="https://github.com/Bryan-GP/Apply-Buddy" target="_blank" rel="noopener">Repo</a>
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
