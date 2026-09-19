@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-09-18T19:30:00Z",
-  "run_notes": "Initial seed. Civil Service Fast Stream 2025/26 is currently closed to applications; IFS has no open vacancies as of this run (next hiring round expected from Oct 2026). These will be picked up automatically once they reopen.",
+  "last_updated": "2026-09-19T15:50:45Z",
+  "run_notes": "Added 2 new roles: Bain & Company Expert Associate Consultant (Tech Insights Group, grad-level) and a Henham Strategy public affairs Researcher. Civil Service Fast Stream remains closed (2025/26 cycle ended, no 2027 window announced yet). IFS, Institute for Government, Chatham House, Resolution Foundation and IPPR currently show no open vacancies (IFS's next hiring round is expected from Oct 2026). No qualifying think-tank roles found today — Policy Exchange's only current opening is an internship (excluded), and GovAI's Research Manager role is too senior (£83k–105k) for grad/junior level. No jobs removed today (nothing at rejected stage, nothing 30+ days past closing with stage still not_applied).",
   "jobs": [
     {
       "id": "am-tax-grad-people-services-2026",
@@ -34,7 +34,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": ""
+      "notes": "Listing page returned 404 on recheck (2026-09-19) though advertised deadline hasn't passed — may have closed early or been taken down. Left in place; not eligible for auto-removal yet."
     },
     {
       "id": "bain-associate-consultant-2027",
@@ -154,6 +154,40 @@
       "applied": false,
       "stage": "not_applied",
       "notes": "Communications and public engagement consultancy, entry-level."
+    },
+    {
+      "id": "bain-expert-associate-consultant-tech-insights-2027",
+      "title": "Expert Associate Consultant, Tech Insights Group",
+      "company": "Bain & Company",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "consulting",
+      "remote": "onsite",
+      "url": "https://www.brightnetwork.co.uk/graduate-jobs/bain-company/expert-associate-consultant-tech-insights-group-2",
+      "source": "Bright Network",
+      "closing_date": "2026-10-16",
+      "date_found": "2026-09-19",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "For penultimate-year students or those with <2 years' experience."
+    },
+    {
+      "id": "henham-strategy-researcher-2026",
+      "title": "Researcher",
+      "company": "Henham Strategy",
+      "location": "London, UK (hybrid, min. 3 days/week office)",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "hybrid",
+      "url": "https://www.publicaffairsnetworking.com/graduatevacancy/researcher-217-26-pubaffairs",
+      "source": "PubAffairs Networking",
+      "closing_date": null,
+      "date_found": "2026-09-19",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Entry-level, starting salary from £27,000."
     }
   ]
 }
