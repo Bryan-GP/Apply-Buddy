@@ -1,10 +1,10 @@
 {
-  "last_updated": "2026-09-19T15:50:45Z",
-  "run_notes": "Added 2 new roles: Bain & Company Expert Associate Consultant (Tech Insights Group, grad-level) and a Henham Strategy public affairs Researcher. Civil Service Fast Stream remains closed (2025/26 cycle ended, no 2027 window announced yet). IFS, Institute for Government, Chatham House, Resolution Foundation and IPPR currently show no open vacancies (IFS's next hiring round is expected from Oct 2026). No qualifying think-tank roles found today — Policy Exchange's only current opening is an internship (excluded), and GovAI's Research Manager role is too senior (£83k–105k) for grad/junior level. No jobs removed today (nothing at rejected stage, nothing 30+ days past closing with stage still not_applied).",
+  "last_updated": "2026-09-20T17:45:00Z",
+  "run_notes": "Added 6 new roles (target was 7; broadened search across Bright Network, PubAffairs Networking, w4mp, OC&C, Roland Berger, McKinsey and Newton career pages still turned up only 6 genuinely open, verifiable UK grad/junior/trainee listings today): Roland Berger Junior Consultant 2027 (consulting), McKinsey Business Analyst London (consulting, rolling), Newton Graduate Consultant Programme (consulting, rolling), OC&C Visualisation & Tools Analyst and a separate OC&C Associate Consultant Strategy 2027-28 track (strategy), and an Eastleigh Lib Dems/Liz Jarvis MP Campaign Organiser & Communications Officer role (government-political, trainee). No jobs removed today (0 rejected, 0 expired 30+ days with stage still not_applied). Civil Service Fast Stream and Government Policy scheme remain closed for this cycle; GES Assistant Economist scheme closed; IFS, Institute for Government, Chatham House, IPPR and Resolution Foundation show no current UK vacancies; no new think-tank roles found. Several promising leads (L.E.K. London Associate, EY-Parthenon Strategy, KPMG/Deloitte/PA Consulting graduate schemes, GovAI Research Manager) were checked but excluded as closed, stale, not UK-specific, or above junior level.",
   "jobs": [
     {
       "id": "am-tax-grad-people-services-2026",
-      "title": "Tax Graduate Programme – People Services Team",
+      "title": "Tax Graduate Programme \u2013 People Services Team",
       "company": "Alvarez & Marsal",
       "location": "London, UK",
       "level": "grad",
@@ -17,11 +17,11 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Closing today — apply immediately if interested."
+      "notes": "Closing today \u2014 apply immediately if interested."
     },
     {
       "id": "erm-consulting-associate-water-manchester-2027",
-      "title": "Consulting Associate – Water Management & Sustainability",
+      "title": "Consulting Associate \u2013 Water Management & Sustainability",
       "company": "ERM",
       "location": "Manchester, UK",
       "level": "grad",
@@ -34,7 +34,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Listing page returned 404 on recheck (2026-09-19) though advertised deadline hasn't passed — may have closed early or been taken down. Left in place; not eligible for auto-removal yet."
+      "notes": "Listing page returned 404 on recheck (2026-09-19) though advertised deadline hasn't passed \u2014 may have closed early or been taken down. Left in place; not eligible for auto-removal yet."
     },
     {
       "id": "bain-associate-consultant-2027",
@@ -89,7 +89,7 @@
     },
     {
       "id": "occ-associate-consultant-analytics-2027",
-      "title": "Associate Consultant – Analytics",
+      "title": "Associate Consultant \u2013 Analytics",
       "company": "OC&C Strategy Consultants",
       "location": "London, UK",
       "level": "grad",
@@ -106,7 +106,7 @@
     },
     {
       "id": "inverto-strategic-procurement-associate",
-      "title": "Strategic Procurement & Supply Chain Management – Associate Consultant",
+      "title": "Strategic Procurement & Supply Chain Management \u2013 Associate Consultant",
       "company": "Inverto (a BCG company)",
       "location": "UK",
       "level": "grad",
@@ -187,7 +187,109 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Entry-level, starting salary from £27,000."
+      "notes": "Entry-level, starting salary from \u00a327,000."
+    },
+    {
+      "id": "roland-berger-junior-consultant-2027",
+      "title": "Junior Consultant 2027",
+      "company": "Roland Berger",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "consulting",
+      "remote": "hybrid",
+      "url": "https://www.rolandberger.com/en/Join/All-Jobs/Junior-Consultant-2027-REF4503I.html",
+      "source": "Roland Berger careers site",
+      "closing_date": "2026-10-18",
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Requires 2:1 or above achieved/on track in 2026 or 2027; first-round interviews 7 Nov."
+    },
+    {
+      "id": "mckinsey-business-analyst-london",
+      "title": "Business Analyst",
+      "company": "McKinsey & Company",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "consulting",
+      "remote": "hybrid",
+      "url": "https://www.mckinsey.com/careers/search-jobs/jobs/businessanalyst-15136",
+      "source": "McKinsey careers site",
+      "closing_date": null,
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Rolling/evergreen requisition spanning 65+ global offices incl. London; entry-level, <4 yrs experience."
+    },
+    {
+      "id": "newton-graduate-consultant-programme-2027",
+      "title": "Graduate Consultant Programme",
+      "company": "Newton",
+      "location": "UK (induction in Oxfordshire; travel to client sites)",
+      "level": "grad",
+      "sector": "consulting",
+      "remote": "onsite",
+      "url": "https://newtonimpact.com/careers/early-careers-hub/graduate-consultant/",
+      "source": "Newton careers site",
+      "closing_date": null,
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "required",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "\u00a348k starting salary + \u00a32.5k joining bonus. Applications opened 14 Sep 2026, rolling until filled (usually ~March). Requires existing right to work in UK, no flexibility stated."
+    },
+    {
+      "id": "occ-visualisation-tools-analyst-london",
+      "title": "Visualisation & Tools Analyst",
+      "company": "OC&C Strategy Consultants",
+      "location": "London, UK",
+      "level": "junior",
+      "sector": "strategy",
+      "remote": "hybrid",
+      "url": "https://careers.occstrategy.com/vacancies/391/visualisation--tools-analyst.html",
+      "source": "OC&C careers site",
+      "closing_date": null,
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Entry-level analyst role; wants 1+ years' experience in a technical/visualisation role."
+    },
+    {
+      "id": "occ-associate-consultant-strategy-2027-28",
+      "title": "Associate Consultant 2027-28 \u2013 Strategy",
+      "company": "OC&C Strategy Consultants",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "strategy",
+      "remote": "hybrid",
+      "url": "https://careers.occstrategy.com/vacancies/388/associate-consultant-2027-28--strategy-london-office.html",
+      "source": "OC&C careers site",
+      "closing_date": "2026-11-01",
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "\u00a354k + \u00a37k signing bonus. Separate Strategy track from the existing Analytics posting; one application per London role only."
+    },
+    {
+      "id": "eastleigh-libdems-campaign-organiser-2026",
+      "title": "Campaign Organiser and Communications Officer",
+      "company": "Liz Jarvis MP / Eastleigh Liberal Democrats",
+      "location": "Eastleigh, Hampshire, UK",
+      "level": "trainee",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100274",
+      "source": "w4mp",
+      "closing_date": "2026-10-03",
+      "date_found": "2026-09-20",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Explicitly pitched as a first/next step into politics or campaigning; full training and ongoing support provided."
     }
   ]
 }
