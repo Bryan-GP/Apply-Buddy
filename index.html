@@ -15,7 +15,12 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark">🎯</div>
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2 4 5.5V11c0 5.2 3.4 9.7 8 11 4.6-1.3 8-5.8 8-11V5.5L12 2Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9 12l2 2 4-4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <div>
         <h1>Apply-Buddy</h1>
         <div class="sub">UK grad · junior · trainee roles in consulting, strategy, advisory, government &amp; policy</div>
@@ -37,10 +42,12 @@
 
   <div class="banner">
     <span class="dot"></span>
-    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser (or sync under your own name in Sync settings for tracking that follows you across devices) · <b>Soonest-closing deadlines sort to the top</b> in every list below.</span>
+    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser (or sync under your own name in Sync settings for tracking that follows you across devices) · <b>Soonest-closing deadlines sort to the top</b> in every list below · <b>Click a tile below to filter</b> — select several to narrow further, click "Total tracked" to clear.</span>
   </div>
 
   <div class="stats" id="stats"></div>
+
+  <div id="quickviewBanner"></div>
 
   <section class="controls" aria-label="Filters">
     <div class="search-row">
@@ -57,7 +64,6 @@
 
     <div class="filters" id="level-filters"></div>
     <div class="filters" id="sector-filters"></div>
-    <div class="filters" id="stage-filters"></div>
 
     <div class="control-row control-row-tight">
       <label class="checkbox-inline">

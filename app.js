@@ -25,7 +25,8 @@
     { key: "trainee", label: "Trainee" }
   ];
 
-  // label + left-border/pill colour class for each application stage
+  // label + left-border/pill colour class for each application stage — also
+  // doubles as the fixed order of the sectioned results list below.
   var STAGES = [
     { key: "not_applied", label: "Not applied", cls: "muted" },
     { key: "applied", label: "Applied", cls: "info" },
@@ -39,7 +40,7 @@
     search: "",
     sectors: new Set(),
     levels: new Set(),
-    stages: new Set(),
+    quickViews: new Set(),
     sort: "closing-asc",
     hideClosed: false
   };
@@ -219,11 +220,28 @@
     return hay.indexOf(qLower) !== -1;
   }
 
+  // ---------- quick views (stat tiles double as filters, Signal Board style) ----------
+  // Clicking a tile toggles it into state.quickViews; several selected tiles
+  // intersect (a job must match every active predicate, not just one) — this
+  // mirrors the fixed 2026-09-22 Signal Board behaviour where tiles AND
+  // together rather than OR. `today` is threaded through so every predicate
+  // agrees on what "today" means.
+  var QUICK_VIEWS = [
+    { key: "foundToday", label: "Found today", cls: "", predicate: function (j, today) { return j.date_found === today; } },
+    { key: "notApplied", label: "Not applied yet", cls: "", predicate: function (j) { return (j.stage || "not_applied") === "not_applied"; } },
+    { key: "inProgress", label: "In progress", cls: "accent", predicate: function (j) { return j.stage === "applied" || j.stage === "interview"; } },
+    { key: "offers", label: "Offers", cls: "ok", predicate: function (j) { return j.stage === "offer"; } },
+    { key: "closingSoon", label: "Closing ≤ 7 days", cls: "warn", predicate: function (j) {
+        var d = daysUntil(j.closing_date);
+        return d !== null && d >= 0 && d <= 7 && (j.stage || "not_applied") !== "rejected";
+      } },
+    { key: "total", label: "Total tracked", cls: "", isTotal: true, predicate: function () { return true; } }
+  ];
+
   // ---------- filtering / sorting ----------
-  function matchesFilters(job) {
+  function matchesFilters(job, today) {
     if (state.sectors.size && !state.sectors.has(job.sector)) return false;
     if (state.levels.size && !state.levels.has(job.level)) return false;
-    if (state.stages.size && !state.stages.has(job.stage || "not_applied")) return false;
     if (state.search) {
       if (!fuzzyMatch(job, state.search.toLowerCase())) return false;
     }
@@ -233,6 +251,17 @@
       // never let the "hide closed" checkbox hide a job you're actively tracking — a
       // closed listing you already applied to is still worth seeing through to an outcome
       if (d !== null && d < 1 && effectiveStage === "not_applied") return false;
+    }
+    if (state.quickViews.size) {
+      var todayStr2 = today || todayStr();
+      var activePredicates = [];
+      state.quickViews.forEach(function (key) {
+        var qv = QUICK_VIEWS.filter(function (q) { return q.key === key; })[0];
+        if (qv) activePredicates.push(qv.predicate);
+      });
+      for (var i = 0; i < activePredicates.length; i++) {
+        if (!activePredicates[i](job, todayStr2)) return false;
+      }
     }
     return true;
   }
@@ -444,54 +473,42 @@
 
     select.addEventListener("change", function () {
       var newStage = select.value;
-      STAGES.forEach(function (s) { select.classList.remove("stage-" + s.key); });
-      select.classList.add("stage-" + newStage);
       job.stage = newStage;
       job.applied = newStage !== "not_applied";
-
-      // if this job no longer matches the active stage filter, a full re-render will
-      // drop it from view — do that instead of the lighter in-place update below
-      if (state.stages.size && !matchesFilters(job)) {
-        setLocalOverlayEntry(job.id, newStage);
-        if (hasTrackerIdentity()) {
-          saveTrackerStageToGitHub(job, newStage, statusEl, function onSynced() { clearLocalOverlayEntry(job.id); });
-        } else if (getToken()) {
-          saveStageToGitHub(job, newStage, statusEl, function onSynced() { clearLocalOverlayEntry(job.id); });
-        }
-        render();
-        return;
-      }
-
-      // in-place visual update: status pill + card border colour, without rebuilding
-      // the whole list (so the transient save-status message below isn't wiped out)
-      var newMeta = metaFor(newStage);
-      var pillEl = card.querySelector(".status-pill");
-      if (pillEl) { pillEl.textContent = newMeta.label; pillEl.className = "status-pill status-" + newMeta.cls; }
-      STAGES.forEach(function (s) { card.classList.remove("s-" + s.cls); });
-      card.classList.add("s-" + newMeta.cls);
-      renderStats();
 
       // Always save privately to this browser first — works with no token, no account, nothing.
       setLocalOverlayEntry(job.id, newStage);
 
+      // A stage change can move the job into a different section (and may drop
+      // it from the active quick-view/filter selection entirely), so re-render
+      // the whole board rather than patching this one card in place.
+      render();
+
+      // After re-render this card's DOM node is gone; grab the equivalent live
+      // status element for the same job (if it's still on screen) to report
+      // sync progress into, falling back to the detached node otherwise.
+      var liveStatusEl = document.querySelector('[data-status-for="' + job.id + '"]') || statusEl;
+
       if (hasTrackerIdentity()) {
         // named-tracker sync: writes to job.trackers[slug] only, never job.stage — cannot
         // collide with the owner's (or anyone else's) tracking of the same job
-        saveTrackerStageToGitHub(job, newStage, statusEl, function onSynced() {
+        saveTrackerStageToGitHub(job, newStage, liveStatusEl, function onSynced() {
           clearLocalOverlayEntry(job.id);
         });
       } else if (getToken()) {
-        saveStageToGitHub(job, newStage, statusEl, function onSynced() {
+        saveStageToGitHub(job, newStage, liveStatusEl, function onSynced() {
           // Canonical copy now matches on GitHub; drop the local override so future visits
           // reflect the shared file directly rather than a possibly-stale local copy.
           clearLocalOverlayEntry(job.id);
         });
       } else {
-        statusEl.textContent = "Saved on this device (private to you).";
-        statusEl.className = "tracker-status ok";
-        setTimeout(function () { statusEl.textContent = ""; }, 3000);
+        liveStatusEl.textContent = "Saved on this device (private to you).";
+        liveStatusEl.className = "tracker-status ok";
+        setTimeout(function () { liveStatusEl.textContent = ""; }, 3000);
       }
     });
+
+    statusEl.setAttribute("data-status-for", job.id);
 
     var foot = el("div", { class: "job-foot" }, [
       el("a", { class: "btn-link", href: job.url, target: "_blank", rel: "noopener", text: "View posting ↗" }),
@@ -502,47 +519,89 @@
     return card;
   }
 
+  function sectionBlock(stageMeta, jobs) {
+    var titleClass = stageMeta.key === "rejected" ? "section-title rejected-title" : "section-title";
+    var cards = jobs.map(renderJobCard);
+    var section = el("div", { class: "section" });
+    var head = el("div", { class: "section-head" }, [
+      el("div", { class: titleClass, html: esc(stageMeta.label) + ' <span class="n mono">' + jobs.length + "</span>" })
+    ]);
+    section.appendChild(head);
+    if (jobs.length) {
+      var list = el("div", { class: "list" }, cards);
+      section.appendChild(list);
+    } else {
+      section.appendChild(el("div", { class: "section-empty", text: "Nothing here in this view." }));
+    }
+    return section;
+  }
+
   function renderStats() {
     var statsEl = document.getElementById("stats");
     if (!statsEl) return;
     var today = todayStr();
     var jobs = state.jobs;
-    var foundToday = jobs.filter(function (j) { return j.date_found === today; }).length;
-    var notApplied = jobs.filter(function (j) { return (j.stage || "not_applied") === "not_applied"; }).length;
-    var inProgress = jobs.filter(function (j) { return j.stage === "applied" || j.stage === "interview"; }).length;
-    var offers = jobs.filter(function (j) { return j.stage === "offer"; }).length;
-    var closingSoon = jobs.filter(function (j) {
-      var d = daysUntil(j.closing_date);
-      return d !== null && d >= 0 && d <= 7 && (j.stage || "not_applied") !== "rejected";
-    }).length;
-    var total = jobs.length;
 
-    var tiles = [
-      { n: foundToday, l: "Found today", cls: "" },
-      { n: notApplied, l: "Not applied yet", cls: "" },
-      { n: inProgress, l: "In progress", cls: "accent" },
-      { n: offers, l: "Offers", cls: "ok" },
-      { n: closingSoon, l: "Closing ≤ 7 days", cls: "warn" },
-      { n: total, l: "Total tracked", cls: "" }
-    ];
-    statsEl.innerHTML = tiles.map(function (t) {
-      return '<div class="stat ' + t.cls + '"><div class="n mono">' + t.n + '</div><div class="l">' + esc(t.l) + "</div></div>";
+    statsEl.innerHTML = QUICK_VIEWS.map(function (qv) {
+      var n = jobs.filter(function (j) { return qv.predicate(j, today); }).length;
+      var isActive = qv.isTotal ? state.quickViews.size === 0 : state.quickViews.has(qv.key);
+      return '<button class="stat ' + qv.cls + (isActive ? " active" : "") + '" data-qv="' + qv.key + '" type="button">' +
+        '<div class="n mono">' + n + '</div><div class="l">' + esc(qv.label) + "</div></button>";
     }).join("");
+
+    statsEl.querySelectorAll("[data-qv]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-qv");
+        var qv = QUICK_VIEWS.filter(function (q) { return q.key === key; })[0];
+        if (qv.isTotal) { state.quickViews.clear(); }
+        else if (state.quickViews.has(key)) { state.quickViews.delete(key); }
+        else { state.quickViews.add(key); }
+        render();
+      });
+    });
+  }
+
+  function renderQuickviewBanner() {
+    var elBanner = document.getElementById("quickviewBanner");
+    if (!elBanner) return;
+    if (state.quickViews.size === 0) { elBanner.innerHTML = ""; return; }
+    var labels = [];
+    state.quickViews.forEach(function (key) {
+      var qv = QUICK_VIEWS.filter(function (q) { return q.key === key; })[0];
+      labels.push(qv ? qv.label : key);
+    });
+    elBanner.innerHTML =
+      '<div class="quickview-banner">' +
+      "<span>Showing only jobs matching all of: <b>" + labels.map(esc).join(" · ") + "</b></span>" +
+      '<button class="quickview-clear" id="quickviewClear" type="button">Clear ✕</button>' +
+      "</div>";
+    var clearBtn = document.getElementById("quickviewClear");
+    if (clearBtn) clearBtn.addEventListener("click", function () { state.quickViews.clear(); render(); });
   }
 
   function render() {
     var results = document.getElementById("results");
     var emptyState = document.getElementById("empty-state");
     var countEl = document.getElementById("job-count");
+    var today = todayStr();
 
-    var filtered = sortJobs(state.jobs.filter(matchesFilters));
+    renderStats();
+    renderQuickviewBanner();
+
+    var filtered = sortJobs(state.jobs.filter(function (j) { return matchesFilters(j, today); }));
 
     results.innerHTML = "";
-    filtered.forEach(function (job) { results.appendChild(renderJobCard(job)); });
+    if (filtered.length === 0) {
+      emptyState.hidden = false;
+    } else {
+      emptyState.hidden = true;
+      STAGES.forEach(function (stageMeta) {
+        var jobsInStage = filtered.filter(function (j) { return (j.stage || "not_applied") === stageMeta.key; });
+        results.appendChild(sectionBlock(stageMeta, jobsInStage));
+      });
+    }
 
-    emptyState.hidden = filtered.length !== 0;
     if (countEl) countEl.textContent = filtered.length + (filtered.length === 1 ? " job shown" : " jobs shown");
-    renderStats();
   }
 
   // ---------- settings panel ----------
@@ -684,17 +743,14 @@
     }
 
     // per-category counts for the filter chips
-    var levelCounts = {}, sectorCounts = {}, stageCounts = {};
+    var levelCounts = {}, sectorCounts = {};
     state.jobs.forEach(function (j) {
       levelCounts[j.level] = (levelCounts[j.level] || 0) + 1;
       sectorCounts[j.sector] = (sectorCounts[j.sector] || 0) + 1;
-      var st = j.stage || "not_applied";
-      stageCounts[st] = (stageCounts[st] || 0) + 1;
     });
 
     buildChips(document.getElementById("level-filters"), LEVELS, state.levels, levelCounts);
     buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors, sectorCounts);
-    buildChips(document.getElementById("stage-filters"), STAGES, state.stages, stageCounts);
 
     document.getElementById("search").addEventListener("input", function (e) {
       state.search = e.target.value;
@@ -712,7 +768,7 @@
       state.search = "";
       state.sectors.clear();
       state.levels.clear();
-      state.stages.clear();
+      state.quickViews.clear();
       state.hideClosed = false;
       document.getElementById("search").value = "";
       document.getElementById("hide-closed").checked = false;
