@@ -30,22 +30,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist folder
-          path: './dist'
+          # This is a plain static site (index.html, app.js, style.css, data/) —
+          # no build step, no package.json, no dist folder. Upload the repo root as-is.
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
