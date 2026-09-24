@@ -42,7 +42,7 @@
 
   <div class="banner">
     <span class="dot"></span>
-    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser (or sync under your own name in Sync settings for tracking that follows you across devices) · <b>Soonest-closing deadlines sort to the top</b> in every list below · <b>Click a tile below to filter</b> — select several to narrow further, click "Total tracked" to clear.</span>
+    <span>Runs once a day, searches real UK sources for new roles, and merges them in automatically · Rejected roles and long-expired, never-applied-to roles are cleaned up automatically · Click a status on any job to track it — <b>works instantly with no account or token</b>, saved privately to this browser (or sync under your own name in Sync settings for tracking that follows you across devices) · <b>Soonest-closing deadlines sort to the top</b> in every list below · <b>Click a tile to filter</b> — select several to narrow further, click "Total tracked" to clear · Level, sector, sort and sync options live under <b>Filters</b> below the search bar.</span>
   </div>
 
   <div class="stats" id="stats"></div>
@@ -54,29 +54,35 @@
       <input type="search" id="search" class="search-input" placeholder="Search title, company, location…" aria-label="Search jobs" autocomplete="off">
     </div>
 
-    <div class="control-row">
-      <select id="sort" aria-label="Sort by">
-        <option value="closing-asc">Closing soonest</option>
-        <option value="found-desc">Newest first</option>
-        <option value="company-asc">Company A–Z</option>
-      </select>
-    </div>
+    <button id="toggle-filters" class="filters-toggle" type="button" aria-expanded="false" aria-controls="filters-panel">
+      <span class="filters-toggle-chevron">▸</span> Filters
+      <span class="filters-toggle-badge mono" id="filters-active-badge" hidden></span>
+    </button>
 
-    <div class="filters" id="level-filters"></div>
-    <div class="filters" id="sector-filters"></div>
-
-    <div class="control-row control-row-tight">
-      <label class="checkbox-inline">
-        <input type="checkbox" id="hide-closed">
-        Hide jobs closing within the next day
-      </label>
-      <div class="control-row-actions">
-        <button id="toggle-settings" class="link-btn" type="button">Sync settings</button>
-        <button id="clear-filters" class="link-btn" type="button">Clear filters</button>
+    <div id="filters-panel" class="filters-panel" hidden>
+      <div class="control-row">
+        <select id="sort" aria-label="Sort by">
+          <option value="closing-asc">Closing soonest</option>
+          <option value="found-desc">Newest first</option>
+          <option value="company-asc">Company A–Z</option>
+        </select>
       </div>
-    </div>
 
-    <div id="settings-panel" class="settings-panel" hidden>
+      <div class="stats filter-tiles" id="level-filters"></div>
+      <div class="stats filter-tiles" id="sector-filters"></div>
+
+      <div class="control-row control-row-tight">
+        <label class="checkbox-inline">
+          <input type="checkbox" id="hide-closed">
+          Hide jobs closing within the next day
+        </label>
+        <div class="control-row-actions">
+          <button id="toggle-settings" class="link-btn" type="button">Sync settings</button>
+          <button id="clear-filters" class="link-btn" type="button">Clear filters</button>
+        </div>
+      </div>
+
+      <div id="settings-panel" class="settings-panel" hidden>
       <p class="settings-copy">
         Clicking an application status on any job already saves it privately to <strong>this browser only</strong> —
         no account, no token, nothing to set up. That's all most people need, and it never touches anyone else's view
@@ -119,6 +125,7 @@
       <p class="settings-copy" style="margin-top:14px;">
         <button id="clear-my-tracking" class="link-btn" type="button">Clear my personal tracking on this device</button>
       </p>
+      </div>
     </div>
   </section>
 

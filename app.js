@@ -113,23 +113,56 @@
     });
   }
 
-  // ---------- filter chips with live counts ----------
-  function buildChips(container, items, selectedSet, counts) {
+  // ---------- level/sector filter tiles — same rectangle-with-a-number look
+  // and click-to-toggle behaviour as the quick-view stat tiles above, just
+  // wired to state.levels/state.sectors instead of state.quickViews. Counts
+  // are fixed per-category totals (computed once at boot), not re-filtered
+  // live — same as the old chip counts this replaces. ----------
+  function buildFilterTiles(container, items, selectedSet, counts) {
     container.innerHTML = "";
     items.forEach(function (item) {
-      var n = counts ? (counts[item.key] || 0) : null;
-      var chip = el("button", { type: "button", class: "chip", "data-key": item.key });
-      chip.appendChild(document.createTextNode(item.label));
-      if (n !== null) {
-        chip.appendChild(el("span", { class: "count mono", text: " " + n }));
-      }
-      chip.addEventListener("click", function () {
+      var n = counts ? (counts[item.key] || 0) : 0;
+      var isActive = selectedSet.has(item.key);
+      var tile = el("button", {
+        type: "button",
+        class: "stat" + (isActive ? " active" : ""),
+        "data-key": item.key,
+        html: '<div class="n mono">' + n + '</div><div class="l">' + esc(item.label) + "</div>"
+      });
+      tile.addEventListener("click", function () {
         if (selectedSet.has(item.key)) selectedSet.delete(item.key);
         else selectedSet.add(item.key);
-        chip.classList.toggle("active");
+        tile.classList.toggle("active");
+        updateFiltersBadge();
         render();
       });
-      container.appendChild(chip);
+      container.appendChild(tile);
+    });
+  }
+
+  // ---------- Filters disclosure toggle + active-filter count badge ----------
+  function activeFilterCount() {
+    return state.levels.size + state.sectors.size + (state.hideClosed ? 1 : 0);
+  }
+  function updateFiltersBadge() {
+    var badge = document.getElementById("filters-active-badge");
+    if (!badge) return;
+    var n = activeFilterCount();
+    if (n > 0) {
+      badge.textContent = String(n);
+      badge.hidden = false;
+    } else {
+      badge.hidden = true;
+    }
+  }
+  function initFiltersToggle() {
+    var toggleBtn = document.getElementById("toggle-filters");
+    var panel = document.getElementById("filters-panel");
+    if (!toggleBtn || !panel) return;
+    toggleBtn.addEventListener("click", function () {
+      var willShow = panel.hidden;
+      panel.hidden = !willShow;
+      toggleBtn.setAttribute("aria-expanded", willShow ? "true" : "false");
     });
   }
 
@@ -742,15 +775,15 @@
       lastUpdated.textContent = "Not yet updated";
     }
 
-    // per-category counts for the filter chips
+    // per-category counts for the filter tiles
     var levelCounts = {}, sectorCounts = {};
     state.jobs.forEach(function (j) {
       levelCounts[j.level] = (levelCounts[j.level] || 0) + 1;
       sectorCounts[j.sector] = (sectorCounts[j.sector] || 0) + 1;
     });
 
-    buildChips(document.getElementById("level-filters"), LEVELS, state.levels, levelCounts);
-    buildChips(document.getElementById("sector-filters"), SECTORS, state.sectors, sectorCounts);
+    buildFilterTiles(document.getElementById("level-filters"), LEVELS, state.levels, levelCounts);
+    buildFilterTiles(document.getElementById("sector-filters"), SECTORS, state.sectors, sectorCounts);
 
     document.getElementById("search").addEventListener("input", function (e) {
       state.search = e.target.value;
@@ -762,6 +795,7 @@
     });
     document.getElementById("hide-closed").addEventListener("change", function (e) {
       state.hideClosed = e.target.checked;
+      updateFiltersBadge();
       render();
     });
     document.getElementById("clear-filters").addEventListener("click", function () {
@@ -772,10 +806,13 @@
       state.hideClosed = false;
       document.getElementById("search").value = "";
       document.getElementById("hide-closed").checked = false;
-      document.querySelectorAll(".chip.active").forEach(function (c) { c.classList.remove("active"); });
+      document.querySelectorAll("#level-filters .stat.active, #sector-filters .stat.active").forEach(function (c) { c.classList.remove("active"); });
+      updateFiltersBadge();
       render();
     });
 
+    initFiltersToggle();
+    updateFiltersBadge();
     initSettings();
     render();
   }

@@ -179,24 +179,32 @@ h1,h2,h3,.display{
 .search-input::placeholder{ color:var(--text-muted); }
 .search-input:focus{ outline:none; border-color:var(--accent); }
 
-/* Filters */
-.filters{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-.filter-label{
-  font-size:11px; font-weight:600; color:var(--text-muted);
-  text-transform:uppercase; letter-spacing:.06em; margin-right:2px;
+/* Filters toggle — the sort/level/sector/hide-closed/sync controls are
+   collapsed behind this by default; the search bar above is never hidden. */
+.filters-toggle{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:inherit; font-size:13px; font-weight:600; color:var(--text);
+  padding:9px 14px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); cursor:pointer; box-shadow:var(--shadow);
+  margin-bottom:14px;
 }
-.chip, .filter-btn{
-  font-family:inherit; font-size:12.5px; font-weight:500;
-  padding:7px 13px; border-radius:999px; border:1px solid var(--border);
-  background:var(--surface); color:var(--text-muted); cursor:pointer;
-  transition:border-color .15s, color .15s, background .15s;
-  user-select:none;
+.filters-toggle:hover{ border-color:var(--accent); }
+.filters-toggle-chevron{ display:inline-block; font-size:11px; color:var(--text-muted); transition:transform .15s; }
+.filters-toggle[aria-expanded="true"] .filters-toggle-chevron{ transform:rotate(90deg); }
+.filters-toggle-badge{
+  font-size:11px; font-weight:600; color:var(--accent); background:var(--accent-soft);
+  padding:2px 7px; border-radius:999px;
 }
-.chip:hover, .filter-btn:hover{ border-color:var(--accent); color:var(--text); }
-.chip.active, .filter-btn.active{
-  background:var(--accent); border-color:var(--accent); color:#fff;
+.filters-panel{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:16px; margin-bottom:20px; box-shadow:var(--shadow);
 }
-.filter-btn .count{ font-family:"IBM Plex Mono",monospace; opacity:.8; margin-left:4px; }
+
+/* Level/sector filters — rectangular tiles that reuse the exact .stat look
+   (big number, label below, clickable, active ring) so they read as the
+   same control family as the quick-view stat tiles above. */
+.filter-tiles{ margin-bottom:14px; }
+.filter-tiles:last-of-type{ margin-bottom:0; }
 
 /* Sort + checkbox controls */
 .control-row{ display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
