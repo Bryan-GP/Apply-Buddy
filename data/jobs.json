@@ -1,10 +1,10 @@
 {
-  "last_updated": "2026-09-24T15:53:00Z",
-  "run_notes": "Added 7 new roles (target met), all government-political sector: Account Executive (Inflect Partners), Parliamentary Assistant (Apsana Begum MP), Graduate Trainee (Invicta Public Affairs), Economic Analyst (Pagefield Group), and three MP Caseworker roles (Rachel Blake, Sarah Jones, Connor Naismith), found via PubAffairs Networking and w4mp. No jobs removed today (0 rejected, 0 expired 30+ days with stage still not_applied). No new consulting/strategy/advisory/think-tank/civil-service roles found today despite a broadened search: PA Consulting, Grant Thornton (Valuations Advisory), WPI Economics (Junior Consultant) and Frontier Economics (Graduate Economic Analyst) postings found were all closed/expired; Deloitte Advisory & Consulting graduate schemes open 5 Oct 2026 (not yet open); KPMG/EY 2027 graduate programmes still in register-your-interest stage. Civil Service Fast Stream remains closed with no reopening date given. Institute for Government, Resolution Foundation, IPPR and Policy Exchange confirmed not currently recruiting for junior roles; onthinktanks.org UK results limited to one over-senior GovAI role, excluded. Existing Bright Network MBB/strategy schemes (Bain, BCG, Kearney, OC&C, Inverto, Roland Berger, McKinsey) remain the only open consulting/strategy listings.",
+  "last_updated": "2026-09-25T11:42:55Z",
+  "run_notes": "Added 9 new roles (target of 7 met/exceeded): 6 government-political (Chambré Account Executive, and Administrative Officer/Caseworker/Executive Assistant/Parliamentary Assistant roles across five MP offices via w4mp), 2 strategy (Teneo, Alpha FMC), 1 consulting (Charles River Associates competition practice). Removed 0 rejected and 0 expired (30+ days past closing, never applied). Civil Service Fast Stream remains closed ('closed for 2025/2026' per official site); unconfirmed LinkedIn chatter suggests a 9 Oct reopening but the official Fast Stream/gov.uk pages do not yet confirm this. No new civil-service or think-tank roles found today — Institute for Government, Chatham House, Resolution Foundation, Policy Exchange and IPPR career pages returned no live junior/graduate listings (IPPR's Policy Futures Programme posting found was for the 2025 cohort, closed). PA Consulting and MHP Communications grad scheme listings found were stale/expired. A Grant Thornton 2027 Advisory Graduate Programme (Belfast) could not be verified (listing page repeatedly timed out) so was not added.",
   "jobs": [
     {
       "id": "am-tax-grad-people-services-2026",
-      "title": "Tax Graduate Programme \u2013 People Services Team",
+      "title": "Tax Graduate Programme – People Services Team",
       "company": "Alvarez & Marsal",
       "location": "London, UK",
       "level": "grad",
@@ -17,11 +17,11 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Closing today \u2014 apply immediately if interested."
+      "notes": "Closing today — apply immediately if interested."
     },
     {
       "id": "erm-consulting-associate-water-manchester-2027",
-      "title": "Consulting Associate \u2013 Water Management & Sustainability",
+      "title": "Consulting Associate – Water Management & Sustainability",
       "company": "ERM",
       "location": "Manchester, UK",
       "level": "grad",
@@ -34,7 +34,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Listing page returned 404 on recheck (2026-09-19) though advertised deadline hasn't passed \u2014 may have closed early or been taken down. Left in place; not eligible for auto-removal yet."
+      "notes": "Listing page returned 404 on recheck (2026-09-19) though advertised deadline hasn't passed — may have closed early or been taken down. Left in place; not eligible for auto-removal yet."
     },
     {
       "id": "bain-associate-consultant-2027",
@@ -89,7 +89,7 @@
     },
     {
       "id": "occ-associate-consultant-analytics-2027",
-      "title": "Associate Consultant \u2013 Analytics",
+      "title": "Associate Consultant – Analytics",
       "company": "OC&C Strategy Consultants",
       "location": "London, UK",
       "level": "grad",
@@ -106,7 +106,7 @@
     },
     {
       "id": "inverto-strategic-procurement-associate",
-      "title": "Strategic Procurement & Supply Chain Management \u2013 Associate Consultant",
+      "title": "Strategic Procurement & Supply Chain Management – Associate Consultant",
       "company": "Inverto (a BCG company)",
       "location": "UK",
       "level": "grad",
@@ -187,7 +187,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "Entry-level, starting salary from \u00a327,000."
+      "notes": "Entry-level, starting salary from £27,000."
     },
     {
       "id": "roland-berger-junior-consultant-2027",
@@ -238,7 +238,7 @@
       "visa_sponsorship": "required",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a348k starting salary + \u00a32.5k joining bonus. Applications opened 14 Sep 2026, rolling until filled (usually ~March). Requires existing right to work in UK, no flexibility stated."
+      "notes": "£48k starting salary + £2.5k joining bonus. Applications opened 14 Sep 2026, rolling until filled (usually ~March). Requires existing right to work in UK, no flexibility stated."
     },
     {
       "id": "occ-visualisation-tools-analyst-london",
@@ -259,7 +259,7 @@
     },
     {
       "id": "occ-associate-consultant-strategy-2027-28",
-      "title": "Associate Consultant 2027-28 \u2013 Strategy",
+      "title": "Associate Consultant 2027-28 – Strategy",
       "company": "OC&C Strategy Consultants",
       "location": "London, UK",
       "level": "grad",
@@ -272,7 +272,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a354k + \u00a37k signing bonus. Separate Strategy track from the existing Analytics posting; one application per London role only."
+      "notes": "£54k + £7k signing bonus. Separate Strategy track from the existing Analytics posting; one application per London role only."
     },
     {
       "id": "eastleigh-libdems-campaign-organiser-2026",
@@ -306,7 +306,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a327,218\u2013\u00a335,000; minimum 3 days/week in constituency office; security vetting required; must be sympathetic to Labour Party aims."
+      "notes": "£27,218–£35,000; minimum 3 days/week in constituency office; security vetting required; must be sympathetic to Labour Party aims."
     },
     {
       "id": "tahir-ali-mp-parliamentary-assistant-2026",
@@ -323,7 +323,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a332,000; Westminster-based; security vetting required."
+      "notes": "£32,000; Westminster-based; security vetting required."
     },
     {
       "id": "careengland-policy-officer-2026",
@@ -340,7 +340,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a335,000\u2013\u00a338,000; may close early if suitable candidate found; care sector policy/advocacy body."
+      "notes": "£35,000–£38,000; may close early if suitable candidate found; care sector policy/advocacy body."
     },
     {
       "id": "careengland-content-comms-officer-2026",
@@ -357,7 +357,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a336,000\u2013\u00a340,000; may close early if suitable candidate found; posted alongside the Policy Officer role above (same listing page)."
+      "notes": "£36,000–£40,000; may close early if suitable candidate found; posted alongside the Policy Officer role above (same listing page)."
     },
     {
       "id": "sunderland-political-assistant-libdem-2026",
@@ -374,7 +374,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a334,811\u2013\u00a337,563; fixed-term to 31 May 2030; agile working; apply via North East Jobs portal."
+      "notes": "£34,811–£37,563; fixed-term to 31 May 2030; agile working; apply via North East Jobs portal."
     },
     {
       "id": "richard-holden-mp-constituency-support-officer-2026",
@@ -408,7 +408,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a334,250 base, \u00a335,750 OTE; education evaluation consultancy; open to a range of experience/backgrounds."
+      "notes": "£34,250 base, £35,750 OTE; education evaluation consultancy; open to a range of experience/backgrounds."
     },
     {
       "id": "inflect-partners-account-executive-2026",
@@ -425,7 +425,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a327,000\u2013\u00a329,000 depending on location; public affairs consultancy; experience preferred but not required, suits early-career applicants. Apply by email."
+      "notes": "£27,000–£29,000 depending on location; public affairs consultancy; experience preferred but not required, suits early-career applicants. Apply by email."
     },
     {
       "id": "begum-mp-parliamentary-assistant-2026",
@@ -442,7 +442,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a328,114\u2013\u00a345,141 (IPSA scale); security vetting via MSVO required; full-time permanent, 5 days/week in constituency office."
+      "notes": "£28,114–£45,141 (IPSA scale); security vetting via MSVO required; full-time permanent, 5 days/week in constituency office."
     },
     {
       "id": "invicta-public-affairs-graduate-trainee-2026",
@@ -459,7 +459,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a328,000\u2013\u00a330,000; 1-year fixed contract with route to Account Executive within 12 months; public affairs consultancy."
+      "notes": "£28,000–£30,000; 1-year fixed contract with route to Account Executive within 12 months; public affairs consultancy."
     },
     {
       "id": "pagefield-economic-analyst-2026",
@@ -476,7 +476,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a332,000; strategic communications/public affairs consultancy; apply via email with CV and 400-word supporting statement."
+      "notes": "£32,000; strategic communications/public affairs consultancy; apply via email with CV and 400-word supporting statement."
     },
     {
       "id": "rachel-blake-mp-caseworker-2026",
@@ -510,7 +510,7 @@
       "visa_sponsorship": "unknown",
       "applied": false,
       "stage": "not_applied",
-      "notes": "\u00a335,000 pro rata; fixed-term through March 2027; prior MP office experience desirable but not essential; security vetting via MSVO required."
+      "notes": "£35,000 pro rata; fixed-term through March 2027; prior MP office experience desirable but not essential; security vetting via MSVO required."
     },
     {
       "id": "naismith-mp-caseworker-2026",
@@ -528,6 +528,159 @@
       "applied": false,
       "stage": "not_applied",
       "notes": "IPSA payscale; permanent full-time with 6-month probation; security vetting via MSVO required; based in Crewe constituency office."
+    },
+    {
+      "id": "chambre-account-executive-belfast-2026",
+      "title": "Account Executive",
+      "company": "Chambré",
+      "location": "Belfast city centre, UK (hybrid)",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "hybrid",
+      "url": "https://www.publicaffairsnetworking.com/vacancy/account-executive-220-26-pubaffairs",
+      "source": "PubAffairs Networking",
+      "closing_date": "2026-10-08",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£25,000; public affairs consultancy focused on Northern Ireland/Ireland political intelligence; explicitly pitched as first step into public affairs."
+    },
+    {
+      "id": "teneo-strategy-communications-graduate-2027",
+      "title": "Strategy & Communications Graduate 2027",
+      "company": "Teneo",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "strategy",
+      "remote": "onsite",
+      "url": "https://www.brightnetwork.co.uk/graduate-jobs/teneo/strategy-communications-graduate-2027",
+      "source": "Bright Network",
+      "closing_date": "2026-10-02",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "required",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Requires unrestricted right to work in the UK, no flexibility stated. Assessment centre 7 Dec in London office."
+    },
+    {
+      "id": "kearns-mp-administrative-officer-2026",
+      "title": "Administrative Officer",
+      "company": "Alicia Kearns MP (Rutland and Stamford)",
+      "location": "Oakham, UK",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100328",
+      "source": "w4mp",
+      "closing_date": "2026-10-09",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£25,528 (IPSA payscale); fixed-term until April 2027 with potential extension; security vetting via MSVO required."
+    },
+    {
+      "id": "cox-mp-caseworker-social-media-officer-2026",
+      "title": "Caseworker & Social Media Officer",
+      "company": "Pam Cox MP (Colchester)",
+      "location": "Colchester, UK",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100327",
+      "source": "w4mp",
+      "closing_date": "2026-10-09",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£28,000–£35,000 DOE; permanent; interviews 16 Oct 2026; apply via email with CV (max 2pp) and cover letter (max 1pp)."
+    },
+    {
+      "id": "chowns-mp-executive-assistant-2026",
+      "title": "Executive Assistant",
+      "company": "Ellie Chowns MP (North Herefordshire)",
+      "location": "Leominster, Herefordshire, UK",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100318",
+      "source": "w4mp",
+      "closing_date": "2026-10-07",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£26,325; fixed-term to 31 Mar 2027; interviews w/c 12 Oct 2026."
+    },
+    {
+      "id": "kumaran-mp-parliamentary-assistant-2026",
+      "title": "Parliamentary Assistant",
+      "company": "Uma Kumaran MP (Stratford and Bow)",
+      "location": "London, UK",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100307",
+      "source": "w4mp",
+      "closing_date": "2026-10-04",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£28,114–£45,141 (IPSA scale); security vetting via MSVO required; interviews w/c 5 Oct 2026."
+    },
+    {
+      "id": "ward-mp-caseworker-2026",
+      "title": "Caseworker",
+      "company": "Melanie Ward MP (Cowdenbeath and Kirkcaldy)",
+      "location": "Kirkcaldy, UK",
+      "level": "junior",
+      "sector": "government-political",
+      "remote": "onsite",
+      "url": "https://www.w4mpjobs.org/JobDetails.aspx?jobid=100330",
+      "source": "w4mp",
+      "closing_date": "2026-10-12",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "IPSA payscale; permanent; security vetting via MSVO required."
+    },
+    {
+      "id": "alpha-fmc-strategy-deals-graduate-2027",
+      "title": "Strategy & Deals Graduate Associate 2027",
+      "company": "Alpha FMC",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "strategy",
+      "remote": "hybrid",
+      "url": "https://www.brightnetwork.co.uk/graduate-jobs/alpha-fmc/strategy-deals-graduate-associate-2027",
+      "source": "Bright Network",
+      "closing_date": "2026-10-18",
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "£40,000 base + discretionary profit share; financial-services strategy & deals consultancy; includes CFA Level 1; 4 days/week in London office."
+    },
+    {
+      "id": "cra-consulting-associate-competition-2027",
+      "title": "Consulting Associate – European Competition Practice 2027",
+      "company": "Charles River Associates",
+      "location": "London, UK",
+      "level": "grad",
+      "sector": "consulting",
+      "remote": "hybrid",
+      "url": "https://www.brightnetwork.co.uk/graduate-jobs/charles-river-associates/consulting-associate-european-competition-practice-london-2027-am6a",
+      "source": "Bright Network",
+      "closing_date": null,
+      "date_found": "2026-09-25",
+      "visa_sponsorship": "unknown",
+      "applied": false,
+      "stage": "not_applied",
+      "notes": "Rolling deadline; economic consulting on EU competition/antitrust cases; targets economics MSc/MPhil grads finishing Dec 2026–Aug 2027; 3–4 days/week in office."
     }
   ]
 }
